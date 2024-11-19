@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model MovimentoFinanceiro{
+  idMovimentoFinanceiro Int @id @default(autoincrement())
+  nome String
+  nCodTitulo Int 
+  nCodCliente Int
+  nCodCtr Int?
+  nCodOS Int
+  cCodProjeto Int?
+  nCodNF Int
+  nCodMovCC Int
+  nCodBaixa Int
+  cNumCtr String @db.VarChar(20)
+  cNumOS String @db.VarChar(15)
+  categoriasMovimentoFinanceiro CategoriasOnMovimentoFinanceiro[]
+  departamentosOnMovimentoFinanceiro DepartamentoOnMovimentoFinanceiro[]
+
+  //Relacionamentos
+  contrato Contrato? @relation(fields: [nCodCtr], references: [idContrato])
+  projeto Projeto? @relation(fields: [cCodProjeto], references: [idProjeto])
+  ordemDeServico OrdemDeServico? @relation(fields: [nCodOS], references: [idOrdemDeServico])
+  notaFiscal NFSe? @relation(fields: [nCodNF], references: [idNF])
+  Clientes Cliente? @relation(fields: [nCodCliente], references: [idCliente])
+  Titulo Titulo? @relation(fields: [nCodTitulo], references: [idTitulo])
+}
+
+model Contrato {
+  idContrato Int @id @default(autoincrement())
+  nome String
+  movimentosFinanceiros MovimentoFinanceiro[]
+}
+
+model Projeto {
+  idProjeto Int @id @default(autoincrement())
+  nome String
+  movimentosFinanceiros MovimentoFinanceiro[]
+}
+
+model OrdemDeServico {
+  idOrdemDeServico Int @id @default(autoincrement())
+  nome String
+  movimentosFinanceiros MovimentoFinanceiro[]
+}
+
+model NFSe {
+  idNF Int @id @default(autoincrement())
+  movimentosFinanceiros MovimentoFinanceiro[]
+}
+
+model Cliente {
+  idCliente Int @id @default(autoincrement())
+  nome String
+  movimentosFinanceiros MovimentoFinanceiro[]
+}
+
+model Titulo {
+ idTitulo Int @id @default(autoincrement())
+ nome String
+ movimentosFinanceiros MovimentoFinanceiro[]
+}
+
+model Categoria{
+  idCategoria String @id @default(uuid())
+  nome String
+  categoriasMovimentoFinanceiro CategoriasOnMovimentoFinanceiro[]
+}
+
+model CategoriasOnMovimentoFinanceiro{
+  codigoCat String @db.VarChar(20)
+  idMovimentoFinanceiro Int
+  porcentagemCategoria Float
+
+  //Relacionamentos
+  categoria Categoria? @relation(fields: [codigoCat], references: [idCategoria])
+  movimentoFinanceiro MovimentoFinanceiro? @relation(fields: [idMovimentoFinanceiro], references: [idMovimentoFinanceiro])
+
+  @@id([codigoCat, idMovimentoFinanceiro])
+}
+
+model Departamento {
+  idDepartamento String @id @default(uuid())
+  nome String
+  DepartamentosOnMovimentosFinanceiros DepartamentoOnMovimentoFinanceiro[]
+}
+
+model DepartamentoOnMovimentoFinanceiro{
+  codDepartamento String @db.VarChar(40) @default(uuid())
+  idMovimentoFinanceiro Int 
+  porcentagemDepartamento Float
+
+  //Relacionamentos
+  departamento Departamento? @relation(fields: [codDepartamento], references: [idDepartamento])
+  movimentoFinanceiro MovimentoFinanceiro? @relation(fields: [idMovimentoFinanceiro], references: [idMovimentoFinanceiro])
+
+  @@id([codDepartamento, idMovimentoFinanceiro])
+}
+
